@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "codification-web",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["codification-web/server/server.js"],
+      "port": 3000
+    }
+  ]
+}

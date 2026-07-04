@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Codification & arborescence projets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B1220;
+    --panel:#111B2E;
+    --panel-alt:#16213A;
+    --border:#243350;
+    --border-soft:#1B2740;
+    --amber:#F2A93B;
+    --teal:#33C7B8;
+    --text:#E8EDF7;
+    --text-muted:#8291AA;
+    --danger:#E2574C;
+    --grid-line: rgba(140,160,200,0.05);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/32px 32px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/32px 32px,
+      var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+    padding:32px 20px 80px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+  header{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom:28px;
+    padding-bottom:20px;
+    border-bottom:1px solid var(--border);
+  }
+  .badge{
+    width:48px;height:48px;flex:none;
+    border:1px solid var(--amber);
+    border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;font-size:14px;color:var(--amber);
+    position:relative;
+  }
+  .badge::after{
+    content:'';position:absolute;top:4px;right:4px;
+    width:5px;height:5px;border-radius:50%;background:var(--teal);
+  }
+  h1{font-size:19px;font-weight:600;margin:0;letter-spacing:0.2px;}
+  header p{margin:2px 0 0;font-size:13px;color:var(--text-muted);}
+  .status-dot{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-muted);margin-left:auto;white-space:nowrap;}
+  .status-dot .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);}
+  .status-dot.off .dot{background:var(--danger);}
+  nav{display:flex;gap:4px;margin-bottom:24px;}
+  nav button{
+    background:transparent;border:1px solid var(--border);
+    color:var(--text-muted);
+    padding:9px 16px;font-size:13px;font-family:inherit;
+    border-radius:6px;cursor:pointer;
+    transition:all .15s;
+  }
+  nav button:hover{border-color:var(--border-soft);color:var(--text);background:var(--panel-alt);}
+  nav button.active{color:var(--bg);background:var(--amber);border-color:var(--amber);font-weight:600;}
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:24px;
+    margin-bottom:20px;
+  }
+  .panel h2{font-size:14px;margin:0 0 4px;font-weight:600;}
+  .panel .hint{font-size:12px;color:var(--text-muted);margin:0 0 18px;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;}
+  .field{flex:1;min-width:180px;margin-bottom:14px;}
+  .field label{display:block;font-size:11.5px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;}
+  input[type=text],input[type=date],select{
+    width:100%;
+    background:var(--panel-alt);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:9px 10px;
+    border-radius:6px;
+    font-size:13.5px;
+    font-family:'IBM Plex Mono',monospace;
+    outline:none;
+  }
+  select{font-family:'IBM Plex Sans',sans-serif;}
+  input:focus,select:focus{border-color:var(--amber);}
+  input::placeholder{color:#4E5C78;font-family:'IBM Plex Sans',sans-serif;}
+  .btn{
+    background:var(--amber);color:#241A05;border:none;padding:10px 18px;border-radius:6px;
+    font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+  }
+  .btn:hover{background:#F7BA5C;}
+  .btn.secondary{background:transparent;border:1px solid var(--teal);color:var(--teal);}
+  .btn.secondary:hover{background:rgba(51,199,184,0.08);}
+  .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+  .btn.ghost:hover{color:var(--text);border-color:var(--border-soft);}
+  .btn.danger{background:transparent;border:1px solid var(--danger);color:var(--danger);}
+  .btn.danger:hover{background:rgba(226,87,76,0.08);}
+  .btn:disabled{opacity:0.35;cursor:not-allowed;}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  a.btn{display:inline-block;text-decoration:none;}
+  .toggle-group{display:flex;gap:8px;margin-bottom:14px;}
+  .toggle-group button{
+    flex:1;background:var(--panel-alt);border:1px solid var(--border);
+    color:var(--text-muted);padding:9px;border-radius:6px;font-size:12.5px;
+    cursor:pointer;font-family:inherit;
+  }
+  .toggle-group button.on{border-color:var(--teal);color:var(--teal);background:rgba(51,199,184,0.07);}
+  .client-card{border:1px solid var(--border-soft);border-radius:8px;padding:14px 16px;margin-bottom:12px;background:var(--panel-alt);}
+  .client-card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .client-name{font-weight:600;font-size:14px;}
+  .client-code{font-family:'IBM Plex Mono',monospace;color:var(--amber);font-size:12.5px;}
+  .install-list{margin-top:10px;border-top:1px dashed var(--border);padding-top:10px;}
+  .install-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;font-size:12.5px;flex-wrap:wrap;}
+  .install-row + .install-row{border-top:1px solid var(--border-soft);}
+  .install-unique{font-family:'IBM Plex Mono',monospace;color:var(--teal);font-size:12.5px;min-width:64px;}
+  .install-name{flex:1;color:var(--text);}
+  .add-install{display:flex;gap:8px;margin-top:10px;}
+  .add-install input{flex:1;}
+  .nameplate{background:linear-gradient(180deg,#1A2740,#141E33);border:1px solid var(--border);border-radius:8px;padding:18px 20px;position:relative;margin:18px 0;}
+  .nameplate::before,.nameplate::after{content:'';position:absolute;width:6px;height:6px;border-radius:50%;background:#293952;top:8px;}
+  .nameplate::before{left:8px;}
+  .nameplate::after{right:8px;}
+  .nameplate-label{font-size:10.5px;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .led{width:6px;height:6px;border-radius:50%;background:var(--teal);display:inline-block;box-shadow:0 0 4px var(--teal);}
+  .nameplate-code{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600;color:var(--amber);word-break:break-all;letter-spacing:0.3px;}
+  .nameplate-code .sep{color:#4E5C78;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th{text-align:left;color:var(--text-muted);font-weight:500;padding:8px 10px;border-bottom:1px solid var(--border);text-transform:uppercase;font-size:10.5px;letter-spacing:0.4px;}
+  td{padding:9px 10px;border-bottom:1px solid var(--border-soft);}
+  td.mono,th.mono{font-family:'IBM Plex Mono',monospace;}
+  tr:hover td{background:rgba(255,255,255,0.02);}
+  .empty{text-align:center;color:var(--text-muted);font-size:13px;padding:40px 20px;border:1px dashed var(--border);border-radius:8px;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--teal);color:#062421;padding:11px 20px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:all .25s;pointer-events:none;z-index:50;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast.error{background:var(--danger);color:#3A0E0B;}
+  .filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .filter-bar select,.filter-bar input{max-width:220px;}
+  .tiny{font-size:11.5px;color:var(--text-muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="badge">SC</div>
+    <div>
+      <h1>Codification & arborescence projets</h1>
+      <p>Registre partagé — d'après PRO-SMI-ALL-QSE-002</p>
+    </div>
+    <span class="status-dot" id="status-dot"><span class="dot"></span><span id="status-text">Connexion...</span></span>
+  </header>
+
+  <nav>
+    <button class="tab-btn active" data-tab="clients">Clients & installations</button>
+    <button class="tab-btn" data-tab="generator">Générer un code</button>
+    <button class="tab-btn" data-tab="history">Historique</button>
+  </nav>
+
+  <section id="tab-clients">
+    <div class="panel">
+      <h2>Nouveau client</h2>
+      <p class="hint">Code client 3 à 5 chiffres, identique pour toutes les installations de ce client.</p>
+      <div class="row">
+        <div class="field" style="max-width:160px;">
+          <label>Code client</label>
+          <input type="text" id="new-client-code" placeholder="12458" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>Nom du client final</label>
+          <input type="text" id="new-client-name" placeholder="Château Margaux">
+        </div>
+        <div class="field" style="flex:none;align-self:flex-end;">
+          <button class="btn" id="btn-add-client" style="margin-bottom:14px;">Ajouter le client</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="padding:14px 24px;">
+      <div class="row" style="align-items:center;">
+        <div class="field" style="margin-bottom:0;">
+          <input type="text" id="client-search" placeholder="Rechercher un client (nom, code, installation...)">
+        </div>
+        <span class="tiny" id="client-search-count" style="flex:none;"></span>
+      </div>
+    </div>
+
+    <div id="client-list"></div>
+
+    <div class="panel">
+      <h2>Réinitialisation</h2>
+      <p class="hint">Efface toutes les données partagées : clients, installations, compteurs et historique.</p>
+      <button class="btn danger" id="btn-reset">Réinitialiser toutes les données</button>
+    </div>
+  </section>
+
+  <section id="tab-generator" style="display:none;">
+    <div class="panel">
+      <h2>Générateur de code</h2>
+      <p class="hint">Applique les règles de codification (§6 documents / §7 programmes) de la procédure.</p>
+
+      <div class="toggle-group" id="kind-toggle">
+        <button data-kind="document" class="on">Document</button>
+        <button data-kind="programme">Programme</button>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Installation</label>
+          <select id="gen-install"></select>
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <select id="gen-type"></select>
+        </div>
+      </div>
+
+      <div class="toggle-group" id="mode-toggle">
+        <button data-mode="new" class="on">Nouveau</button>
+        <button data-mode="revision">Révision / archive d'un existant</button>
+      </div>
+
+      <div id="mode-new-fields">
+        <div class="row">
+          <div class="field">
+            <label>Commentaire (nom installation/machine)</label>
+            <input type="text" id="gen-comment" placeholder="ex: Tremie remplisseuse">
+          </div>
+          <div class="field" style="max-width:180px;">
+            <label>Séparateur</label>
+            <div class="toggle-group" id="sep-toggle" style="margin-bottom:0;">
+              <button data-sep="-" class="on">Tirets</button>
+              <button data-sep="">PascalCase</button>
+            </div>
+          </div>
+        </div>
+        <div class="field" id="rev-doc-field" style="max-width:260px;">
+          <label><input type="checkbox" id="gen-rev-check"> Envoi client (ajoute REV-A)</label>
+        </div>
+      </div>
+
+      <div id="mode-revision-fields" style="display:none;">
+        <div class="field">
+          <label>Document / programme existant</label>
+          <select id="gen-existing"></select>
+        </div>
+        <div class="field" id="revision-date-field" style="max-width:220px;display:none;">
+          <label>Date d'archive</label>
+          <input type="date" id="gen-archive-date">
+        </div>
+      </div>
+
+      <div class="nameplate">
+        <div class="nameplate-label"><span class="led"></span>Aperçu du code</div>
+        <div class="nameplate-code" id="preview-code">—</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" id="btn-generate">Enregistrer & copier le code</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-history" style="display:none;">
+    <div class="panel">
+      <h2>Historique des codes générés</h2>
+      <div class="filter-bar">
+        <select id="filter-install"><option value="">Toutes les installations</option></select>
+        <select id="filter-kind">
+          <option value="">Document + programme</option>
+          <option value="document">Documents</option>
+          <option value="programme">Programmes</option>
+        </select>
+        <input type="text" id="filter-search" placeholder="Recherche dans le code...">
+      </div>
+      <div id="history-table-wrap"></div>
+      <div class="btn-row">
+        <a class="btn secondary" href="/api/export.csv" id="btn-export-csv">Exporter en CSV</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let STATE = { clients: [], history: [] };
+let TYPES = { documents: [], programmes: [] };
+let uiState = { kind: "document", mode: "new", sep: "-" };
+
+async function api(path, options){
+  const res = await fetch(path, options);
+  if(!res.ok){
+    let msg = "Erreur serveur";
+    try{ const j = await res.json(); msg = j.error || msg; }catch(e){}
+    throw new Error(msg);
+  }
+  return res.status === 204 ? null : res.json();
+}
+
+function showToast(msg, isError){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.toggle("error", !!isError);
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2400);
+}
+
+function setStatus(ok){
+  const dot = document.getElementById("status-dot");
+  const txt = document.getElementById("status-text");
+  dot.classList.toggle("off", !ok);
+  txt.textContent = ok ? "Connecté" : "Serveur injoignable";
+}
+
+async function loadState(){
+  try{
+    STATE = await api("/api/state");
+    setStatus(true);
+  }catch(e){
+    setStatus(false);
+    showToast("Impossible de contacter le serveur", true);
+  }
+}
+async function loadTypes(){
+  try{ TYPES = await api("/api/types"); }catch(e){}
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function allInstallations(){
+  const out = [];
+  STATE.clients.forEach(c=>{
+    (c.installations||[]).forEach(i=>{ out.push({ clientCode:c.code, clientName:c.name, ...i }); });
+  });
+  return out;
+}
+
+/* ---------- TABS ---------- */
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", async ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    ["clients","generator","history"].forEach(t=>{
+      document.getElementById("tab-"+t).style.display = (t===btn.dataset.tab) ? "block" : "none";
+    });
+    await loadState();
+    if(btn.dataset.tab === "clients") renderClients();
+    if(btn.dataset.tab === "generator") refreshGeneratorOptions();
+    if(btn.dataset.tab === "history") renderHistory();
+  });
+});
+
+/* ---------- CLIENTS TAB ---------- */
+function normalizeSearch(s){ return stripAccents(String(s)).toLowerCase(); }
+
+function renderClients(){
+  const wrap = document.getElementById("client-list");
+  const countEl = document.getElementById("client-search-count");
+  if(STATE.clients.length === 0){
+    wrap.innerHTML = `<div class="empty">Aucun client enregistré. Ajoute un client ci-dessus pour commencer.</div>`;
+    countEl.textContent = "";
+    return;
+  }
+  const query = normalizeSearch(document.getElementById("client-search").value.trim());
+  const clients = !query ? STATE.clients : STATE.clients.filter(c=>{
+    if(normalizeSearch(c.name).includes(query) || normalizeSearch(c.code).includes(query)) return true;
+    return (c.installations||[]).some(i=> normalizeSearch(i.name).includes(query) || normalizeSearch(i.uniqueNumber).includes(query));
+  });
+  countEl.textContent = query ? `${clients.length} client${clients.length>1?"s":""} sur ${STATE.clients.length}` : `${STATE.clients.length} clients`;
+  if(clients.length === 0){
+    wrap.innerHTML = `<div class="empty">Aucun client ne correspond à « ${escapeHtml(document.getElementById("client-search").value.trim())} ».</div>`;
+    return;
+  }
+  wrap.innerHTML = "";
+  clients.forEach(client=>{
+    const card = document.createElement("div");
+    card.className = "client-card";
+    const installs = client.installations || [];
+    card.innerHTML = `
+      <div class="client-card-head">
+        <div><span class="client-name">${escapeHtml(client.name)}</span> &nbsp; <span class="client-code">${escapeHtml(client.code)}</span></div>
+      </div>
+      <div class="install-list">
+        ${installs.length === 0 ? '<p class="tiny">Aucune installation pour ce client.</p>' : installs.map(inst => `
+          <div class="install-row">
+            <span class="install-unique">${escapeHtml(inst.uniqueNumber)}</span>
+            <span class="install-name">${escapeHtml(inst.name)}</span>
+            <a class="btn ghost" href="/api/tree?uniqueNumber=${encodeURIComponent(inst.uniqueNumber)}&installName=${encodeURIComponent(inst.name)}">Arborescence .zip</a>
+          </div>
+        `).join("")}
+      </div>
+      <div class="add-install">
+        <input type="text" placeholder="Nom installation/projet (ex: Skid de filtration)" data-addinstall="${escapeHtml(client.code)}">
+        <button class="btn secondary" data-addinstallbtn="${escapeHtml(client.code)}">Ajouter installation</button>
+      </div>
+    `;
+    wrap.appendChild(card);
+  });
+
+  wrap.querySelectorAll("[data-addinstallbtn]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const code = btn.dataset.addinstallbtn;
+      const input = wrap.querySelector(`[data-addinstall="${CSS.escape(code)}"]`);
+      const name = input.value.trim();
+      if(!name){ showToast("Indique un nom d'installation", true); return; }
+      try{
+        const inst = await api(`/api/clients/${encodeURIComponent(code)}/installations`, {
+          method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ name })
+        });
+        input.value = "";
+        await loadState();
+        renderClients();
+        showToast(`Installation ${inst.uniqueNumber} ajoutée`);
+      }catch(e){ showToast(e.message, true); }
+    });
+  });
+}
+
+document.getElementById("client-search").addEventListener("input", renderClients);
+
+document.getElementById("btn-add-client").addEventListener("click", async ()=>{
+  const codeInput = document.getElementById("new-client-code");
+  const nameInput = document.getElementById("new-client-name");
+  const code = codeInput.value.trim();
+  const name = nameInput.value.trim();
+  try{
+    await api("/api/clients", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ code, name }) });
+    codeInput.value = ""; nameInput.value = "";
+    await loadState();
+    renderClients();
+    showToast(`Client ${name} ajouté`);
+  }catch(e){ showToast(e.message, true); }
+});
+
+document.getElementById("btn-reset").addEventListener("click", async ()=>{
+  if(!confirm("Effacer toutes les données partagées (clients, installations, historique) ? Cette action est irréversible pour tous les collaborateurs.")) return;
+  try{
+    await api("/api/reset", { method:"POST" });
+    await loadState();
+    renderClients();
+    refreshGeneratorOptions();
+    renderHistory();
+    showToast("Données réinitialisées");
+  }catch(e){ showToast(e.message, true); }
+});
+
+/* ---------- GENERATOR TAB ---------- */
+document.querySelectorAll("#kind-toggle button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("#kind-toggle button").forEach(b=>b.classList.remove("on"));
+    btn.classList.add("on");
+    uiState.kind = btn.dataset.kind;
+    document.getElementById("rev-doc-field").style.display = uiState.kind === "document" ? "block" : "none";
+    refreshGeneratorOptions();
+  });
+});
+document.querySelectorAll("#mode-toggle button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("#mode-toggle button").forEach(b=>b.classList.remove("on"));
+    btn.classList.add("on");
+    uiState.mode = btn.dataset.mode;
+    document.getElementById("mode-new-fields").style.display = uiState.mode === "new" ? "block" : "none";
+    document.getElementById("mode-revision-fields").style.display = uiState.mode === "revision" ? "block" : "none";
+    refreshGeneratorOptions();
+  });
+});
+document.querySelectorAll("#sep-toggle button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("#sep-toggle button").forEach(b=>b.classList.remove("on"));
+    btn.classList.add("on");
+    uiState.sep = btn.dataset.sep;
+    updatePreview();
+  });
+});
+
+async function refreshGeneratorOptions(){
+  const installs = allInstallations();
+  const installSel = document.getElementById("gen-install");
+  installSel.innerHTML = installs.length
+    ? installs.map(i=>`<option value="${escapeHtml(i.uniqueNumber)}">${escapeHtml(i.uniqueNumber)} — ${escapeHtml(i.name)} (${escapeHtml(i.clientName)})</option>`).join("")
+    : `<option value="">Aucune installation — ajoute-en une dans l'onglet Clients</option>`;
+
+  const types = uiState.kind === "document" ? TYPES.documents : TYPES.programmes;
+  const typeSel = document.getElementById("gen-type");
+  typeSel.innerHTML = (types||[]).map(([code,label])=>`<option value="${code}">${code} — ${label}</option>`).join("");
+
+  document.getElementById("revision-date-field").style.display = uiState.kind === "programme" ? "block" : "none";
+  if(uiState.kind === "programme"){
+    document.getElementById("gen-archive-date").valueAsDate = new Date();
+  }
+
+  refreshExistingOptions();
+  await updatePreview();
+}
+
+function refreshExistingOptions(){
+  const uniqueNumber = document.getElementById("gen-install").value;
+  const type = document.getElementById("gen-type").value;
+  const sel = document.getElementById("gen-existing");
+  const matches = STATE.history.filter(h => h.uniqueNumber === uniqueNumber && h.type === type && h.kind === uiState.kind && h.mode !== "revision" && h.mode !== "archive_copy");
+  sel.innerHTML = matches.length
+    ? matches.map(h=>`<option value="${h.id}">${escapeHtml(h.code)}</option>`).join("")
+    : `<option value="">Aucun document/programme initial trouvé pour ce type/installation</option>`;
+}
+
+[document.getElementById("gen-install"), document.getElementById("gen-type")].forEach(el=>{
+  el.addEventListener("change", async ()=>{ refreshExistingOptions(); await updatePreview(); });
+});
+document.getElementById("gen-existing").addEventListener("change", updatePreview);
+document.getElementById("gen-comment").addEventListener("input", updatePreview);
+document.getElementById("gen-rev-check").addEventListener("change", updatePreview);
+document.getElementById("gen-archive-date").addEventListener("change", updatePreview);
+
+function stripAccents(str){ return str.normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
+function buildCommentPreview(str, sep){
+  return stripAccents(str||"Commentaire").split(/[^a-zA-Z0-9]+/).filter(Boolean)
+    .map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(sep);
+}
+
+async function updatePreview(){
+  const uniqueNumber = document.getElementById("gen-install").value;
+  const type = document.getElementById("gen-type").value;
+  const el = document.getElementById("preview-code");
+  if(!uniqueNumber || !type){ el.textContent = "—"; return; }
+
+  let code = "—";
+  if(uiState.mode === "new"){
+    let chrono = "···";
+    try{ const r = await api(`/api/peek?uniqueNumber=${encodeURIComponent(uniqueNumber)}&type=${encodeURIComponent(type)}`); chrono = r.chrono; }catch(e){}
+    const comment = buildCommentPreview(document.getElementById("gen-comment").value, uiState.sep);
+    code = `${type}_${uniqueNumber}_${chrono}_${comment}`;
+    if(uiState.kind === "document" && document.getElementById("gen-rev-check").checked) code += "_REV-A";
+  } else {
+    const existingId = document.getElementById("gen-existing").value;
+    const existing = STATE.history.find(h=>h.id === existingId);
+    if(existing){
+      if(uiState.kind === "document"){
+        code = `${existing.baseCode || existing.code}_REV-?`;
+      } else {
+        const dateVal = document.getElementById("gen-archive-date").value;
+        const d = dateVal ? new Date(dateVal + "T00:00:00") : new Date();
+        const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), day=String(d.getDate()).padStart(2,"0");
+        code = `${existing.baseCode || existing.code}_${y}${m}${day}`;
+      }
+    }
+  }
+  el.innerHTML = code.split("_").map(seg=>`<span>${escapeHtml(seg)}</span>`).join('<span class="sep">_</span>');
+}
+
+document.getElementById("btn-generate").addEventListener("click", async ()=>{
+  const uniqueNumber = document.getElementById("gen-install").value;
+  const type = document.getElementById("gen-type").value;
+  if(!uniqueNumber || !type){ showToast("Sélectionne une installation et un type", true); return; }
+
+  const payload = {
+    kind: uiState.kind, uniqueNumber, type, mode: uiState.mode === "new" ? "new" : null
+  };
+  if(uiState.mode === "new"){
+    payload.mode = "new";
+    payload.comment = document.getElementById("gen-comment").value;
+    payload.sep = uiState.sep;
+    payload.sendToClient = document.getElementById("gen-rev-check").checked;
+  } else {
+    payload.existingId = document.getElementById("gen-existing").value;
+    if(!payload.existingId){ showToast("Sélectionne un document/programme existant", true); return; }
+    payload.mode = uiState.kind === "document" ? "revision" : "archive";
+    if(uiState.kind === "programme"){
+      payload.archiveDate = document.getElementById("gen-archive-date").value;
+    }
+  }
+
+  try{
+    const entry = await api("/api/generate", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload) });
+    await loadState();
+    refreshExistingOptions();
+    await updatePreview();
+    try{ await navigator.clipboard.writeText(entry.code); showToast("Code enregistré et copié : " + entry.code); }
+    catch(e){ showToast("Code enregistré : " + entry.code); }
+    if(uiState.mode === "new"){ document.getElementById("gen-comment").value=""; document.getElementById("gen-rev-check").checked=false; }
+    renderHistory();
+  }catch(e){ showToast(e.message, true); }
+});
+
+/* ---------- HISTORY TAB ---------- */
+function renderHistory(){
+  const installSel = document.getElementById("filter-install");
+  const installs = allInstallations();
+  const currentVal = installSel.value;
+  installSel.innerHTML = `<option value="">Toutes les installations</option>` + installs.map(i=>`<option value="${escapeHtml(i.uniqueNumber)}">${escapeHtml(i.uniqueNumber)} — ${escapeHtml(i.name)}</option>`).join("");
+  installSel.value = currentVal;
+
+  const kindFilter = document.getElementById("filter-kind").value;
+  const search = document.getElementById("filter-search").value.trim().toLowerCase();
+  const installFilter = installSel.value;
+
+  let rows = STATE.history.filter(h=>{
+    if(kindFilter && h.kind !== kindFilter) return false;
+    if(installFilter && h.uniqueNumber !== installFilter) return false;
+    if(search && !h.code.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  const wrap = document.getElementById("history-table-wrap");
+  if(rows.length === 0){
+    wrap.innerHTML = `<div class="empty">Aucun code généré pour l'instant.</div>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <table>
+      <thead><tr><th>Date</th><th>Installation</th><th>Genre</th><th class="mono">Code</th><th></th></tr></thead>
+      <tbody>
+        ${rows.map(h=>`
+          <tr>
+            <td>${new Date(h.date).toLocaleDateString("fr-FR")}</td>
+            <td class="mono">${escapeHtml(h.uniqueNumber)}</td>
+            <td>${h.kind === "document" ? "Document" : "Programme"}</td>
+            <td class="mono">${escapeHtml(h.code)}</td>
+            <td><button class="btn ghost" data-copy="${escapeHtml(h.code)}">Copier</button></td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+  wrap.querySelectorAll("[data-copy]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      try{ await navigator.clipboard.writeText(btn.dataset.copy); showToast("Copié : " + btn.dataset.copy); }
+      catch(e){ showToast("Impossible de copier", true); }
+    });
+  });
+}
+["filter-install","filter-kind"].forEach(id=>document.getElementById(id).addEventListener("change", renderHistory));
+document.getElementById("filter-search").addEventListener("input", renderHistory);
+
+/* ---------- INIT ---------- */
+(async function init(){
+  await loadTypes();
+  await loadState();
+  renderClients();
+  await refreshGeneratorOptions();
+  renderHistory();
+  setInterval(loadState, 15000); // rafraîchit l'état toutes les 15s pour voir les ajouts des collègues
+})();
+</script>
+</body>
+</html>
